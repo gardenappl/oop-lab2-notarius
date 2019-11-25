@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <memory>
-#include <editor/noteeditor.h>
+#include <editor/noteeditor.hpp>
 #include <notes/notecontext.hpp>
 
 QT_BEGIN_NAMESPACE

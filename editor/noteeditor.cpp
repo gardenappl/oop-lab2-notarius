@@ -1,4 +1,4 @@
-#include "noteeditor.h"
+#include "noteeditor.hpp"
 #include "ui_noteeditor.h"
 
 NoteEditor::NoteEditor(Note *noteInfo, QWidget *parent) :

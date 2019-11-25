@@ -1,5 +1,6 @@
-#include "mainwindow.h"
+#include "mainwindow.hpp"
 #include "./ui_mainwindow.h"
+#include "editor/noteeditor.hpp"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -7,7 +8,6 @@
 #include <QTextStream>
 #include <iostream>
 
-#include <editor/noteeditor.h>
 
 MainWindow::MainWindow(NoteContext context, QWidget *parent)
     : QMainWindow(parent),

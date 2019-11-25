@@ -16,13 +16,13 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 add_executable(notarius
   main.cpp
   mainwindow.cpp
-  mainwindow.h
+  mainwindow.hpp
   mainwindow.ui
   welcomewindow.cpp
-  welcomewindow.h
+  welcomewindow.hpp
   welcomewindow.ui
   editor/noteeditor.cpp
-  editor/noteeditor.h
+  editor/noteeditor.hpp
   editor/noteeditor.ui
   notes/notecontext.cpp
   notes/notecontext.hpp
