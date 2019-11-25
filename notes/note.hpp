@@ -6,13 +6,12 @@
 
 
 
-struct EditorTab
+struct Note
 {
 public:
-    QUrl uri;
     QString name;
 
-    EditorTab(QUrl uri, QString name);
+    Note(QString name);
 };
 
 #endif // EDITORTAB_H

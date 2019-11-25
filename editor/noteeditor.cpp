@@ -1,9 +1,9 @@
 #include "noteeditor.h"
 #include "ui_noteeditor.h"
 
-NoteEditor::NoteEditor(QUrl url, QWidget *parent) :
+NoteEditor::NoteEditor(Note *noteInfo, QWidget *parent) :
     QFrame(parent),
-    tabInfo(EditorTab(url, url.fileName())),
+    noteInfo(noteInfo),
     ui(new Ui::NoteEditor)
 {
     ui->setupUi(this);
@@ -14,14 +14,14 @@ NoteEditor::~NoteEditor()
     delete ui;
 }
 
-QString NoteEditor::getName()
+Note* NoteEditor::getNoteInfo()
 {
-    return tabInfo.name;
+    return noteInfo;
 }
 
-QUrl NoteEditor::getUri()
+QString NoteEditor::getName()
 {
-    return tabInfo.uri;
+    return noteInfo->name;
 }
 
 QTextEdit* NoteEditor::getEditor()

@@ -24,8 +24,10 @@ add_executable(notarius
   editor/noteeditor.cpp
   editor/noteeditor.h
   editor/noteeditor.ui
-  editor/editortab.cpp
-  editor/editortab.h
+  notes/notecontext.cpp
+  notes/notecontext.hpp
+  notes/note.cpp
+  notes/note.hpp
 )
 
 target_link_libraries(notarius PRIVATE Qt5::Widgets)

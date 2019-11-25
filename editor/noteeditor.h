@@ -1,7 +1,7 @@
 #ifndef NOTEEDITOR_H
 #define NOTEEDITOR_H
 
-#include "editortab.h"
+#include "notes/note.hpp"
 
 #include <QFrame>
 #include <QTextEdit>
@@ -13,14 +13,14 @@ class NoteEditor;
 class NoteEditor : public QFrame
 {
     Q_OBJECT
-    EditorTab tabInfo;
+    Note* noteInfo;
 
 public:
-    explicit NoteEditor(QUrl url, QWidget *parent = nullptr);
+    explicit NoteEditor(Note* noteInfo, QWidget *parent = nullptr);
     ~NoteEditor();
 
-    QUrl getUri();
     QString getName();
+    Note* getNoteInfo();
     QTextEdit* getEditor();
 
 private:

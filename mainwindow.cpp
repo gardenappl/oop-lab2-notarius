@@ -9,9 +9,10 @@
 
 #include <editor/noteeditor.h>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+MainWindow::MainWindow(NoteContext context, QWidget *parent)
+    : QMainWindow(parent),
+      currentContext(context),
+      ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     setCentralWidget(ui->tabWidget);
@@ -30,13 +31,14 @@ NoteEditor* MainWindow::open(QUrl url)
     for(int i = 0; i < ui->tabWidget->count(); i++)
     {
         NoteEditor* editor = (NoteEditor*)ui->tabWidget->widget(i);
-        if(editor->getUri() == url)
+        if(currentContext.getUrl(editor->getNoteInfo()) == url)
         {
             ui->tabWidget->setCurrentIndex(i);
             return editor;
         }
     }
-    NoteEditor* editor = new NoteEditor(url);
+    Note* note = new Note(url.fileName());
+    NoteEditor* editor = new NoteEditor(note);
     ui->tabWidget->addTab(editor, editor->getName());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
     return editor;
@@ -64,8 +66,13 @@ void MainWindow::save()
         return;
 
     NoteEditor* currentEditor = (NoteEditor*)(ui->tabWidget->currentWidget());
-    QUrl fileUrl(currentEditor->getUri());
+    QUrl fileUrl(currentContext.getUrl(currentEditor->getNoteInfo()));
     std::cout << "Saving to URL: " << fileUrl.path().toStdString() << std::endl;
+
+    //Make sure folder exists
+    QDir dirUrl(currentContext.getUrl().path());
+    dirUrl.mkpath(".");
+
     QFile file(fileUrl.path());
     if (!file.open(QIODevice::WriteOnly | QFile::Text))
     {
