@@ -6,13 +6,18 @@ NoteContext::NoteContext(QUrl url, QString name)
     : url(url), name(name)
 {}
 
-QUrl NoteContext::getUrl(Note* note)
+void NoteContext::init()
 {
-    return QUrl(QDir::cleanPath(url.toString() + '/' + name + '/' + note->name));
+
 }
 
-QUrl NoteContext::getUrl()
+QString NoteContext::getPath(Note* note)
 {
-    return QUrl(QDir::cleanPath(url.toString() + '/' + name));
+    return QDir::cleanPath(url.toString() + '/' + name + '/' + note->name);
+}
+
+QString NoteContext::getPath()
+{
+    return QDir::cleanPath(url.toString() + '/' + name);
 }
 

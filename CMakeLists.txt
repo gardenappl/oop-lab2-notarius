@@ -18,9 +18,6 @@ add_executable(notarius
   mainwindow.cpp
   mainwindow.hpp
   mainwindow.ui
-  welcomewindow.cpp
-  welcomewindow.hpp
-  welcomewindow.ui
   editor/noteeditor.cpp
   editor/noteeditor.hpp
   editor/noteeditor.ui

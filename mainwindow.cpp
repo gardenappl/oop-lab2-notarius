@@ -3,6 +3,7 @@
 #include "editor/noteeditor.hpp"
 
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QStandardPaths>
 #include <QTextStream>
@@ -19,6 +20,7 @@ MainWindow::MainWindow(NoteContext context, QWidget *parent)
 
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::import);
     connect(ui->actionSave, &QAction::triggered, this, &MainWindow::save);
+    connect(ui->actionNew_Context, &QAction::triggered, this, &MainWindow::createNewContext);
 }
 
 MainWindow::~MainWindow()
@@ -31,8 +33,11 @@ NoteEditor* MainWindow::open(QUrl url)
     for(int i = 0; i < ui->tabWidget->count(); i++)
     {
         NoteEditor* editor = (NoteEditor*)ui->tabWidget->widget(i);
-        if(currentContext.getUrl(editor->getNoteInfo()) == url)
+        std::cout << "Current widget URL:" << currentContext.getPath(editor->getNoteInfo()).toStdString() << std::endl;
+        std::cout << "Open URL:" << url.path().toStdString() << std::endl;
+        if(QUrl(currentContext.getPath(editor->getNoteInfo())) == url)
         {
+            std::cout << "Equal" << std::endl;
             ui->tabWidget->setCurrentIndex(i);
             return editor;
         }
@@ -49,7 +54,7 @@ void MainWindow::import()
     QUrl fileURL = QFileDialog::getOpenFileUrl(this, tr("Open the file"));
     QFile file(fileURL.path());
     if (!file.open(QIODevice::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, "Warning", "Cannot open file: " + file.errorString());
+        QMessageBox::warning(this, tr("Warning"), tr("Cannot open file: ") + file.errorString());
         return;
     }
     QTextStream in(&file);
@@ -66,21 +71,28 @@ void MainWindow::save()
         return;
 
     NoteEditor* currentEditor = (NoteEditor*)(ui->tabWidget->currentWidget());
-    QUrl fileUrl(currentContext.getUrl(currentEditor->getNoteInfo()));
+    QUrl fileUrl(currentContext.getPath(currentEditor->getNoteInfo()));
     std::cout << "Saving to URL: " << fileUrl.path().toStdString() << std::endl;
 
     //Make sure folder exists
-    QDir dirUrl(currentContext.getUrl().path());
+    QDir dirUrl(currentContext.getPath());
     dirUrl.mkpath(".");
 
     QFile file(fileUrl.path());
     if (!file.open(QIODevice::WriteOnly | QFile::Text))
     {
-        QMessageBox::warning(this, "Warning", "Cannot save file: " + file.errorString());
+        QMessageBox::warning(this, tr("Warning"), tr("Cannot save file: ") + file.errorString());
         return;
     }
     QTextStream out(&file);
     QString text = currentEditor->getEditor()->toPlainText();
     out << text;
     file.close();
+}
+
+void MainWindow::createNewContext()
+{
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("Create new context"), tr("Enter context name: "),
+                                         QLineEdit::Normal, tr("My Notes"), &ok);
 }
