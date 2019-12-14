@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMenu>
 #include <memory>
 #include <vector>
 #include <editor/noteeditor.hpp>
@@ -13,9 +14,9 @@ QT_END_NAMESPACE
 
 
 /*!
- * \brief The MainWindow is the actual editor window for a given note context.
+ * \brief The EditorWindow is the actual editor window for a given note context.
  */
-class MainWindow : public QMainWindow
+class EditorWindow : public QMainWindow
 {
     Q_OBJECT
 
@@ -25,8 +26,14 @@ public:
      * \param context a note context that the user will be working with.
      * \param parent an optional parent widget.
      */
-    MainWindow(NoteContext context, QWidget *parent = nullptr);
-    ~MainWindow();
+    EditorWindow(NoteContext context, QWidget *parent = nullptr);
+    ~EditorWindow();
+
+    /*!
+     * \brief Get the path to the folder in which all Notarius contexts are stored.
+     * \return the storage folder's path URL.
+     */
+    static QString getNotesFolder();
 
 private slots:
 //    /*!
@@ -47,6 +54,13 @@ private slots:
      */
     void createNewNote();
 
+    /*!
+     * Exports the entire current note context as a single text file,
+     * prompts the user to enter its file and location.
+     */
+    void exportContextAsFile();
+
+
 private:
     /*!
      * \brief Open a tab with a TabEditor for a given Note. Will create a TabEditor object if one doesn't exist for this note.
@@ -55,6 +69,14 @@ private:
      * \throw std::invalid_argument if the current context does not contain this note
      */
     NoteEditor* open(Note& note);
+
+    /*!
+     * \brief Open a new instance of Notarius with the given context.
+     * \param context the name of the context
+     * \param firstTime whether this is context was just created for the first time.
+     * \return a NoteEditor pointer
+     */
+    void openContext(QString context, bool firstTime);
 
     /*!
      * \brief Create a NoteEditor for a given ID and read the appropriate Note's content from disk.
@@ -74,8 +96,21 @@ private:
      */
     NoteContext currentContext;
 
+    /*!
+     * \brief contains all currently open NoteEditors
+     */
     std::vector<NoteEditor*> editors;
-    size_t currentEditorID;
+
+    /*!
+     * \brief Get a vector containing a few recently created/edited contexts.
+     * \return a vector of names of recent contexts
+     */
+    QStringList getRecentContexts();
+
+//    /*!
+//     * \brief The actions of the Open Recent... menu
+//     */
+//    QMenu recentContextsMenu;
 
     Ui::MainWindow *ui;
 };

@@ -51,11 +51,16 @@
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuOpen_Recent">
+     <property name="title">
+      <string>Open Recent</string>
+     </property>
+    </widget>
     <addaction name="actionNew_Context"/>
     <addaction name="actionNew_Note"/>
-    <addaction name="actionOpen"/>
-    <addaction name="actionOpen_Recent"/>
+    <addaction name="menuOpen_Recent"/>
     <addaction name="actionSave"/>
+    <addaction name="actionExport_Context_as_File"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -63,15 +68,18 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuNote">
+    <property name="title">
+     <string>Note</string>
+    </property>
+    <addaction name="actionMove_to_archive"/>
+    <addaction name="actionShow_hide_archived_notes"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuNote"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionOpen_Recent">
-   <property name="text">
-    <string>Open Recent</string>
-   </property>
-  </action>
   <action name="actionOpen">
    <property name="text">
     <string>Import From File...</string>
@@ -95,6 +103,26 @@
   <action name="actionNew_Note">
    <property name="text">
     <string>New Note...</string>
+   </property>
+  </action>
+  <action name="actionMove_to_archive">
+   <property name="text">
+    <string>Move to archive</string>
+   </property>
+  </action>
+  <action name="actionShow_hide_archived_notes">
+   <property name="text">
+    <string>Show/hide archived notes</string>
+   </property>
+  </action>
+  <action name="actionrecent">
+   <property name="text">
+    <string>recent</string>
+   </property>
+  </action>
+  <action name="actionExport_Context_as_File">
+   <property name="text">
+    <string>Export Context as File...</string>
    </property>
   </action>
  </widget>

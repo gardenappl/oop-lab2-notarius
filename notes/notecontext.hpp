@@ -97,12 +97,6 @@ public:
 
 private:
     /*!
-     * \brief Get the path to the folder in which all Notarius contexts are stored.
-     * \return the storage folder's path URL.
-     */
-    static QString getStorageFolderPath();
-
-    /*!
      * \brief a list of notes, associated with an ID
      */
     std::unordered_map<size_t, Note> notes;

@@ -1,5 +1,5 @@
-#include "mainwindow.hpp"
-#include "./ui_mainwindow.h"
+#include "./editorwindow.hpp"
+#include "./ui_editorwindow.h"
 #include "editor/noteeditor.hpp"
 
 #include <QFileDialog>
@@ -12,7 +12,7 @@
 #include <iostream>
 
 
-MainWindow::MainWindow(NoteContext context, QWidget *parent)
+EditorWindow::EditorWindow(NoteContext context, QWidget *parent)
     : QMainWindow(parent),
       currentContext(context),
       ui(new Ui::MainWindow)
@@ -21,9 +21,22 @@ MainWindow::MainWindow(NoteContext context, QWidget *parent)
     setCentralWidget(ui->tabWidget);
 
     //connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::import);
-    connect(ui->actionSave, &QAction::triggered, this, &MainWindow::saveCurrentNote);
-    connect(ui->actionNew_Context, &QAction::triggered, this, &MainWindow::createNewContext);
-    connect(ui->actionNew_Note, &QAction::triggered, this, &MainWindow::createNewNote);
+    connect(ui->actionSave, &QAction::triggered, this, &EditorWindow::saveCurrentNote);
+    connect(ui->actionNew_Context, &QAction::triggered, this, &EditorWindow::createNewContext);
+    connect(ui->actionNew_Note, &QAction::triggered, this, &EditorWindow::createNewNote);
+    connect(ui->actionExport_Context_as_File, &QAction::triggered, this, &EditorWindow::exportContextAsFile);
+
+
+    QStringList recentContexts = getRecentContexts();
+    std::cout << "Contexts: " << recentContexts.size() << std::endl;
+    for(int i = 0; i < recentContexts.size(); i++)
+    {
+        std::cout << recentContexts[i].toStdString() << std::endl;
+        ui->menuOpen_Recent->addAction(new QAction(recentContexts[i]));
+        connect(ui->menuOpen_Recent->actions()[i], &QAction::triggered, this,
+                [=](){ openContext(recentContexts[i], false); });
+    }
+
 
     setWindowTitle("Notarius - " + currentContext.name);
     currentContext.init();
@@ -44,14 +57,14 @@ MainWindow::MainWindow(NoteContext context, QWidget *parent)
 
 
 
-MainWindow::~MainWindow()
+EditorWindow::~EditorWindow()
 {
     for(const auto& editor: editors)
         delete editor;
     delete ui;
 }
 
-NoteEditor* MainWindow::open(Note& note)
+NoteEditor* EditorWindow::open(Note& note)
 {
     for(int i = 0; i < ui->tabWidget->count(); i++)
     {
@@ -71,7 +84,19 @@ NoteEditor* MainWindow::open(Note& note)
     throw std::invalid_argument("The current context does not contain this note");
 }
 
-NoteEditor* MainWindow::load(size_t id)
+void EditorWindow::openContext(QString context, bool firstTime)
+{
+    QProcess process;
+    process.setProgram("notarius");
+    QStringList arguments;
+    arguments << "--context" << context;
+    if(firstTime)
+        arguments << "--new";
+    process.setArguments(arguments);
+    process.startDetached();
+}
+
+NoteEditor* EditorWindow::load(size_t id)
 {
     NoteEditor* newEditor = new NoteEditor(&currentContext, id);
 
@@ -106,9 +131,12 @@ NoteEditor* MainWindow::load(size_t id)
 //    file.close();
 //}
 
-void MainWindow::saveCurrentNote()
+void EditorWindow::saveCurrentNote()
 {
-    currentContext.save();
+    if(!currentContext.save())
+    {
+        QMessageBox::warning(this, tr("Warning"), tr("Unable to save context"));
+    }
 
     if(ui->tabWidget->currentIndex() == -1)
         return;
@@ -133,7 +161,7 @@ void MainWindow::saveCurrentNote()
     file.close();
 }
 
-void MainWindow::createNewContext()
+void EditorWindow::createNewContext()
 {
     bool ok;
     QString text = QInputDialog::getText(this, tr("Create new context"), tr("Enter context name: "),
@@ -143,13 +171,10 @@ void MainWindow::createNewContext()
         return;
 
     std::cout << text.toStdString() << std::endl;
-    QProcess process;
-    process.setProgram("notarius");
-    process.setArguments(QStringList() << "--context" << text);
-    process.startDetached();
+    openContext(text, true);
 }
 
-void MainWindow::createNewNote()
+void EditorWindow::createNewNote()
 {
     QString suggestedName = tr("Note ") + QString::number(currentContext.getNextAvailableID() + 1);
     bool ok;
@@ -165,4 +190,46 @@ void MainWindow::createNewNote()
     editors.push_back(newEditor);
     ui->tabWidget->addTab(newEditor, newEditor->getName());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
+}
+
+void EditorWindow::exportContextAsFile()
+{
+    QUrl fileUrl = QFileDialog::getSaveFileUrl(this, tr("Create a file to import to..."));
+    QFile file(fileUrl.path());
+    if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
+        QMessageBox::warning(this, tr("Warning"), tr("Cannot open file: ") + file.errorString());
+        return;
+    }
+    QTextStream out(&file);
+
+    QDir contextsDir = QDir(currentContext.getPath());
+    QFileInfoList fileList = contextsDir.entryInfoList(QDir::Files, QDir::Time);
+    for(int i = 0; i < fileList.size(); i++)
+    {
+        std::cout << fileList[i].filePath().toStdString() << std::endl;
+        if(fileList[i].fileName() != "context.json")
+        {
+            out << fileList[i].fileName() << " " << fileList[i].metadataChangeTime().toString() << std::endl;
+            QFile readFile(fileList[i].filePath());
+            if (!readFile.open(QIODevice::ReadOnly | QFile::Text)) {
+                QMessageBox::warning(this, tr("Warning"), tr("Cannot open file: ") + file.errorString());
+                return;
+            }
+            out << readFile.readAll();
+        }
+    }
+}
+
+QString EditorWindow::getNotesFolder()
+{
+    return QDir::cleanPath(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/Notarius");
+}
+
+QStringList EditorWindow::getRecentContexts()
+{
+    QDir contextsDir = QDir(getNotesFolder());
+    QStringList list = contextsDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time);
+    while(list.size() > 5)
+        list.removeLast();
+    return list;
 }

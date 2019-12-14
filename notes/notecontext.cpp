@@ -11,6 +11,7 @@
 #include <QFile>
 #include <QApplication>
 #include <QJsonDocument>
+#include <editor/editorwindow.hpp>
 
 NoteContext::NoteContext(QString name)
     : name(name)
@@ -30,15 +31,15 @@ bool NoteContext::init()
     for(const auto& note : notesArray)
     {
         size_t id = note.toObject()["ID"].toString().toInt();
-        std::cout << "ID: " << id << std::endl;
         notes[id] = Note(note.toObject()["Name"].toString());
     }
-    std::cout << "[init]Notes count: " << notes.size() << std::endl;
+    setCreationDate(QDateTime::fromSecsSinceEpoch(jsonData["Created"].toString().toInt()));
     return true;
 }
 
 bool NoteContext::save()
 {
+    std::cout << "Saving context..." << std::endl;
     QJsonObject jsonData;
     QJsonArray notesArray;
     for(const auto& note : notes)
@@ -49,6 +50,13 @@ bool NoteContext::save()
         notesArray.push_back(noteObject);
     }
     jsonData.insert("Notes", notesArray);
+    jsonData.insert("Created", getCreationDate().toSecsSinceEpoch());
+
+    //Make sure folder exists
+    QDir dirUrl(getPath());
+    dirUrl.mkpath(".");
+
+    std::cout << "Saving context to " << (getPath() + "/context.json").toStdString() << std::endl;
     QFile saveFile(QDir::cleanPath(getPath() + "/context.json"));
     if(!saveFile.open(QIODevice::WriteOnly))
     {
@@ -61,12 +69,12 @@ bool NoteContext::save()
 
 QString NoteContext::getPath(const Note& note)
 {
-    return QDir::cleanPath(getStorageFolderPath() + '/' + name + '/' + note.name);
+    return QDir::cleanPath(EditorWindow::getNotesFolder() + '/' + name + '/' + note.name);
 }
 
 QString NoteContext::getPath()
 {
-    return QDir::cleanPath(getStorageFolderPath() + '/' + name);
+    return QDir::cleanPath(EditorWindow::getNotesFolder() + '/' + name);
 }
 
 size_t NoteContext::addNote(Note newNote)
@@ -86,10 +94,6 @@ Note NoteContext::getNoteByID(size_t id)
     return notes.at(id);
 }
 
-QString NoteContext::getStorageFolderPath()
-{
-    return QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-}
 
 size_t NoteContext::getNextAvailableID()
 {
@@ -102,4 +106,14 @@ size_t NoteContext::getNextAvailableID()
 const std::unordered_map<size_t, Note>* NoteContext::getNotes()
 {
     return &notes;
+}
+
+void NoteContext::setCreationDate(QDateTime dateTime)
+{
+    creationDate = dateTime;
+}
+
+QDateTime NoteContext::getCreationDate()
+{
+    return creationDate;
 }
