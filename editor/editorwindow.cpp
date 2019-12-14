@@ -195,6 +195,8 @@ void EditorWindow::createNewNote()
 void EditorWindow::exportContextAsFile()
 {
     QUrl fileUrl = QFileDialog::getSaveFileUrl(this, tr("Create a file to import to..."));
+    if(fileUrl.isEmpty())
+        return;
     QFile file(fileUrl.path());
     if (!file.open(QIODevice::WriteOnly | QFile::Text)) {
         QMessageBox::warning(this, tr("Warning"), tr("Cannot open file: ") + file.errorString());
@@ -209,13 +211,16 @@ void EditorWindow::exportContextAsFile()
         std::cout << fileList[i].filePath().toStdString() << std::endl;
         if(fileList[i].fileName() != "context.json")
         {
-            out << fileList[i].fileName() << " " << fileList[i].metadataChangeTime().toString() << std::endl;
+            out << "=====================\n";
+            out << fileList[i].fileName() << ", " << fileList[i].metadataChangeTime().toString() << '\n';
+            out << "=====================\n\n";
+
             QFile readFile(fileList[i].filePath());
             if (!readFile.open(QIODevice::ReadOnly | QFile::Text)) {
                 QMessageBox::warning(this, tr("Warning"), tr("Cannot open file: ") + file.errorString());
                 return;
             }
-            out << readFile.readAll();
+            out << readFile.readAll() << "\n\n";
         }
     }
 }

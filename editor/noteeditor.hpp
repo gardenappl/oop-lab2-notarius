@@ -22,8 +22,20 @@ public:
     explicit NoteEditor(NoteContext* context, size_t noteID, QWidget *parent = nullptr);
     ~NoteEditor();
 
+    /*!
+     * \brief Get the name of the note that's opened in this editor.
+     * \return name of the note
+     */
     QString getName();
+    /*!
+     * \brief Get an instance of the note that's opened in this editor.
+     * \return the note instance
+     */
     Note getNoteInfo();
+    /*!
+     * \brief Get an instance of the QTextEdit widget that's used by this editor.
+     * \return the widget
+     */
     QTextEdit* getEditor();
 
 private:
