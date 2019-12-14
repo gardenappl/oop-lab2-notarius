@@ -48,7 +48,21 @@ private slots:
     void createNewNote();
 
 private:
-    //NoteEditor* open(QUrl uri);
+    /*!
+     * \brief Open a tab with a TabEditor for a given Note. Will create a TabEditor object if one doesn't exist for this note.
+     * \param note a note that the user wants to edit
+     * \return a NoteEditor pointer
+     * \throw std::invalid_argument if the current context does not contain this note
+     */
+    NoteEditor* open(Note& note);
+
+    /*!
+     * \brief Create a NoteEditor for a given ID and read the appropriate Note's content from disk.
+     * \param id the ID of a note.
+     * \return a NoteEditor pointer
+     * \throw std::invalid_argument if the current context does not contain a note with this ID
+     */
+    NoteEditor* load(size_t id);
 
     /*!
      * \brief The name of the default context.

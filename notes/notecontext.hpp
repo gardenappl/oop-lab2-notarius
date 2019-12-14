@@ -33,13 +33,15 @@ public:
 
     /*!
      * \brief Populate the NoteContext's fields based on the data that's stored on the device.
+     * \return whether or not the loading was successful
      */
-    void init();
+    bool init();
 
     /*!
      * \brief Save the state of this context to disk.
+     * \return whether or not the save was successful
      */
-    void save();
+    bool save();
 
     /*!
      * Return the URL of the file which contains this particular note.
@@ -53,6 +55,12 @@ public:
      * \return a folder URL
      */
     QString getPath();
+
+    /*!
+     * \brief return a pointer to a constant map of this context's notes
+     * \return a pointer to the context's notes
+     */
+    const std::unordered_map<size_t, Note>* getNotes();
 
     /*!
      * \brief Add a note to this context. The note's name must be unique within this context.

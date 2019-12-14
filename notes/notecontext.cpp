@@ -6,21 +6,57 @@
 
 #include <QDir>
 #include <QStandardPaths>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QFile>
+#include <QApplication>
+#include <QJsonDocument>
 
 NoteContext::NoteContext(QString name)
     : name(name)
 {}
 
-void NoteContext::init()
+bool NoteContext::init()
 {
+    QFile loadFile(QDir::cleanPath(getPath() + "/context.json"));
+    if(!loadFile.open(QIODevice::ReadOnly))
+        return false;
 
+    QByteArray saveData = loadFile.readAll();
+
+    QJsonDocument doc(QJsonDocument::fromJson(saveData));
+    QJsonObject jsonData = doc.object();
+    QJsonArray notesArray = jsonData["Notes"].toArray();
+    for(const auto& note : notesArray)
+    {
+        size_t id = note.toObject()["ID"].toString().toInt();
+        std::cout << "ID: " << id << std::endl;
+        notes[id] = Note(note.toObject()["Name"].toString());
+    }
+    std::cout << "[init]Notes count: " << notes.size() << std::endl;
+    return true;
 }
 
-void NoteContext::save()
+bool NoteContext::save()
 {
-    std::ofstream file;
-    file.open(getPath().toStdString() + "/context.info");
-    file << "Context" << std::endl;
+    QJsonObject jsonData;
+    QJsonArray notesArray;
+    for(const auto& note : notes)
+    {
+        QJsonObject noteObject;
+        noteObject.insert("ID", QString::number(note.first));
+        noteObject.insert("Name", note.second.name);
+        notesArray.push_back(noteObject);
+    }
+    jsonData.insert("Notes", notesArray);
+    QFile saveFile(QDir::cleanPath(getPath() + "/context.json"));
+    if(!saveFile.open(QIODevice::WriteOnly))
+    {
+        return false;
+    }
+    QJsonDocument doc(jsonData);
+    saveFile.write(doc.toJson());
+    return true;
 }
 
 QString NoteContext::getPath(const Note& note)
@@ -63,3 +99,7 @@ size_t NoteContext::getNextAvailableID()
     return newID;
 }
 
+const std::unordered_map<size_t, Note>* NoteContext::getNotes()
+{
+    return &notes;
+}
