@@ -1,9 +1,10 @@
 #include "noteeditor.hpp"
 #include "ui_noteeditor.h"
 
-NoteEditor::NoteEditor(Note *noteInfo, QWidget *parent) :
+NoteEditor::NoteEditor(NoteContext *context, size_t noteID, QWidget *parent) :
     QFrame(parent),
-    noteInfo(noteInfo),
+    noteID(noteID),
+    context(context),
     ui(new Ui::NoteEditor)
 {
     ui->setupUi(this);
@@ -14,14 +15,14 @@ NoteEditor::~NoteEditor()
     delete ui;
 }
 
-Note* NoteEditor::getNoteInfo()
+Note NoteEditor::getNoteInfo()
 {
-    return noteInfo;
+    return context->getNoteByID(noteID);
 }
 
 QString NoteEditor::getName()
 {
-    return noteInfo->name;
+    return getNoteInfo().name;
 }
 
 QTextEdit* NoteEditor::getEditor()

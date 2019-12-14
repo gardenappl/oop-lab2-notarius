@@ -20,11 +20,11 @@ MainWindow::MainWindow(NoteContext context, QWidget *parent)
     ui->setupUi(this);
     setCentralWidget(ui->tabWidget);
 
-    connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::import);
-    connect(ui->actionSave, &QAction::triggered, this, &MainWindow::save);
+    //connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::import);
+    connect(ui->actionSave, &QAction::triggered, this, &MainWindow::saveCurrentNote);
     connect(ui->actionNew_Context, &QAction::triggered, this, &MainWindow::createNewContext);
+    connect(ui->actionNew_Note, &QAction::triggered, this, &MainWindow::createNewNote);
 
-    std::cout << "current context name: " << context.name.toStdString() << std::endl;
     setWindowTitle("Notarius - " + context.name);
 }
 
@@ -35,44 +35,44 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-NoteEditor* MainWindow::open(QUrl url)
-{
-    for(int i = 0; i < ui->tabWidget->count(); i++)
-    {
-        NoteEditor* editor = (NoteEditor*)ui->tabWidget->widget(i);
-        std::cout << "Current widget URL:" << currentContext.getPath(editor->getNoteInfo()).toStdString() << std::endl;
-        std::cout << "Open URL:" << url.path().toStdString() << std::endl;
-        if(QUrl(currentContext.getPath(editor->getNoteInfo())) == url)
-        {
-            std::cout << "Equal" << std::endl;
-            ui->tabWidget->setCurrentIndex(i);
-            return editor;
-        }
-    }
-    Note* note = new Note(url.fileName());
-    NoteEditor* editor = new NoteEditor(note);
-    ui->tabWidget->addTab(editor, editor->getName());
-    ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
-    return editor;
-}
+//NoteEditor* MainWindow::open(QUrl url)
+//{
+//    for(int i = 0; i < ui->tabWidget->count(); i++)
+//    {
+//        NoteEditor* editor = (NoteEditor*)ui->tabWidget->widget(i);
+//        std::cout << "Current widget URL:" << currentContext.getPath(editor->getNoteInfo()).toStdString() << std::endl;
+//        std::cout << "Open URL:" << url.path().toStdString() << std::endl;
+//        if(QUrl(currentContext.getPath(editor->getNoteInfo())) == url)
+//        {
+//            std::cout << "Equal" << std::endl;
+//            ui->tabWidget->setCurrentIndex(i);
+//            return editor;
+//        }
+//    }
+//    Note* note = new Note(url.fileName());
+//    NoteEditor* editor = new NoteEditor(note);
+//    ui->tabWidget->addTab(editor, editor->getName());
+//    ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
+//    return editor;
+//}
 
-void MainWindow::import()
-{
-    QUrl fileURL = QFileDialog::getOpenFileUrl(this, tr("Open the file"));
-    QFile file(fileURL.path());
-    if (!file.open(QIODevice::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr("Warning"), tr("Cannot open file: ") + file.errorString());
-        return;
-    }
-    QTextStream in(&file);
-    QString text = in.readAll();
+//void MainWindow::import()
+//{
+//    QUrl fileURL = QFileDialog::getOpenFileUrl(this, tr("Open the file"));
+//    QFile file(fileURL.path());
+//    if (!file.open(QIODevice::ReadOnly | QFile::Text)) {
+//        QMessageBox::warning(this, tr("Warning"), tr("Cannot open file: ") + file.errorString());
+//        return;
+//    }
+//    QTextStream in(&file);
+//    QString text = in.readAll();
 
-    NoteEditor* editor = open(fileURL);
-    editor->getEditor()->setText(text);
-    file.close();
-}
+//    NoteEditor* editor = open(fileURL);
+//    editor->getEditor()->setText(text);
+//    file.close();
+//}
 
-void MainWindow::save()
+void MainWindow::saveCurrentNote()
 {
     if(ui->tabWidget->currentIndex() == -1)
         return;
@@ -103,9 +103,29 @@ void MainWindow::createNewContext()
     QString text = QInputDialog::getText(this, tr("Create new context"), tr("Enter context name: "),
                                          QLineEdit::Normal, tr("My Notes"), &ok);
 
+    if(!ok)
+        return;
+
     std::cout << text.toStdString() << std::endl;
     QProcess process;
     process.setProgram("notarius");
     process.setArguments(QStringList() << "--context" << text);
     process.startDetached();
+}
+
+void MainWindow::createNewNote()
+{
+    QString suggestedName = tr("Note ") + QString::number(currentContext.getNextAvailableID() + 1);
+    bool ok;
+    QString noteName = QInputDialog::getText(this, tr("Create new note"), tr("Enter note name: "),
+                                         QLineEdit::Normal, suggestedName, &ok);
+
+    if(!ok)
+        return;
+
+    Note newNote(noteName);
+    size_t id = currentContext.addNote(newNote);
+    NoteEditor* newEditor = new NoteEditor(&currentContext, id);
+    ui->tabWidget->addTab(newEditor, newEditor->getName());
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
 }

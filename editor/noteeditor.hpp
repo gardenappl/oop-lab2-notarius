@@ -6,6 +6,8 @@
 #include <QFrame>
 #include <QTextEdit>
 
+#include <notes/notecontext.hpp>
+
 namespace Ui {
 class NoteEditor;
 }
@@ -13,14 +15,15 @@ class NoteEditor;
 class NoteEditor : public QFrame
 {
     Q_OBJECT
-    Note* noteInfo;
+    size_t noteID;
+    NoteContext* context;
 
 public:
-    explicit NoteEditor(Note* noteInfo, QWidget *parent = nullptr);
+    explicit NoteEditor(NoteContext* context, size_t noteID, QWidget *parent = nullptr);
     ~NoteEditor();
 
     QString getName();
-    Note* getNoteInfo();
+    Note getNoteInfo();
     QTextEdit* getEditor();
 
 private:

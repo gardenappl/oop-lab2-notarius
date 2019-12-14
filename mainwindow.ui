@@ -51,8 +51,9 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen"/>
     <addaction name="actionNew_Context"/>
+    <addaction name="actionNew_Note"/>
+    <addaction name="actionOpen"/>
     <addaction name="actionOpen_Recent"/>
     <addaction name="actionSave"/>
    </widget>
@@ -89,6 +90,11 @@
   <action name="actionNew_Context">
    <property name="text">
     <string>New Context...</string>
+   </property>
+  </action>
+  <action name="actionNew_Note">
+   <property name="text">
+    <string>New Note...</string>
    </property>
   </action>
  </widget>

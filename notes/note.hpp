@@ -11,6 +11,7 @@ struct Note
 public:
     QString name;
 
+    Note() = default;
     Note(QString name);
 };
 

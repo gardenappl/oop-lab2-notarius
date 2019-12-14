@@ -23,9 +23,9 @@ void NoteContext::save()
     file << "Context" << std::endl;
 }
 
-QString NoteContext::getPath(Note* note)
+QString NoteContext::getPath(const Note& note)
 {
-    return QDir::cleanPath(getStorageFolderPath() + '/' + name + '/' + note->name);
+    return QDir::cleanPath(getStorageFolderPath() + '/' + name + '/' + note.name);
 }
 
 QString NoteContext::getPath()
@@ -33,18 +33,33 @@ QString NoteContext::getPath()
     return QDir::cleanPath(getStorageFolderPath() + '/' + name);
 }
 
-void NoteContext::addNote(Note newNote)
+size_t NoteContext::addNote(Note newNote)
 {
-    for(const Note& note : notes)
+    for(const auto& note : notes)
     {
-        if(note.name == newNote.name)
+        if(note.second.name == newNote.name)
             throw std::invalid_argument("The context already contains a note with the same name.");
     }
-    notes.push_back(newNote);
+    size_t newID = getNextAvailableID();
+    notes[newID] = newNote;
+    return newID;
+}
+
+Note NoteContext::getNoteByID(size_t id)
+{
+    return notes.at(id);
 }
 
 QString NoteContext::getStorageFolderPath()
 {
     return QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+}
+
+size_t NoteContext::getNextAvailableID()
+{
+    size_t newID = 0;
+    while(notes.count(newID) != 0)
+        newID++;
+    return newID;
 }
 

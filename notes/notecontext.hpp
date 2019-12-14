@@ -5,6 +5,8 @@
 #include <QScopedPointer>
 #include <QUrl>
 #include <memory>
+#include <vector>
+#include <unordered_map>
 
 #include <notes/note.hpp>
 
@@ -45,7 +47,7 @@ public:
      * \param note a note
      * \return the URL of the folder which contains this context, and the note's file name appended to it.
      */
-    QString getPath(Note* note);
+    QString getPath(const Note& note);
     /*!
      * \brief return the URL of the folder which contains this context.
      * \return a folder URL
@@ -56,8 +58,17 @@ public:
      * \brief Add a note to this context. The note's name must be unique within this context.
      * \param note a new note
      * \throws std::invalid_argument if the context contains a note with the same name.
+     * \returns the ID of the note within the array.
      */
-    void addNote(Note newNote);
+    size_t addNote(Note newNote);
+
+    /*!
+     * \brief Get an instance of a Note associated with a given ID.
+     * \param id an index
+     * \return the associated Note
+     * \throws std::invalid_argument if no note exists with such an ID
+     */
+    Note getNoteByID(size_t id);
 
     /*!
      * \brief Set the date of this context's creation.
@@ -70,6 +81,12 @@ public:
      */
     QDateTime getCreationDate();
 
+    /*!
+     * \brief Get an ID that's not taken by any Note instance.
+     * \return a new ID
+     */
+    size_t getNextAvailableID();
+
 private:
     /*!
      * \brief Get the path to the folder in which all Notarius contexts are stored.
@@ -78,10 +95,13 @@ private:
     static QString getStorageFolderPath();
 
     /*!
-     * \brief a list of notes
+     * \brief a list of notes, associated with an ID
      */
-    std::vector<Note> notes;
+    std::unordered_map<size_t, Note> notes;
 
+    /*!
+     * \brief creationDate the time and date of this context's creation
+     */
     QDateTime creationDate;
 };
 
