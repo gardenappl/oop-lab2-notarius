@@ -5,6 +5,8 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QStringList>
+#include <QProcess>
 #include <QStandardPaths>
 #include <QTextStream>
 #include <iostream>
@@ -21,7 +23,12 @@ MainWindow::MainWindow(NoteContext context, QWidget *parent)
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::import);
     connect(ui->actionSave, &QAction::triggered, this, &MainWindow::save);
     connect(ui->actionNew_Context, &QAction::triggered, this, &MainWindow::createNewContext);
+
+    std::cout << "current context name: " << context.name.toStdString() << std::endl;
+    setWindowTitle("Notarius - " + context.name);
 }
+
+
 
 MainWindow::~MainWindow()
 {
@@ -95,4 +102,10 @@ void MainWindow::createNewContext()
     bool ok;
     QString text = QInputDialog::getText(this, tr("Create new context"), tr("Enter context name: "),
                                          QLineEdit::Normal, tr("My Notes"), &ok);
+
+    std::cout << text.toStdString() << std::endl;
+    QProcess process;
+    process.setProgram("notarius");
+    process.setArguments(QStringList() << "--context" << text);
+    process.startDetached();
 }

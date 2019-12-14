@@ -40,11 +40,13 @@ private:
     NoteEditor* open(QUrl uri);
 
     /*!
-     * \brief Open a file and import that as a note. The note's name will be the same as the file name, with a suffix
-     * appended if a note with the same name already exists within the current context.
+     * \brief The name of the default context.
      */
-    const QString defaultFolderName = "My Notes";
+    const QString defaultContextName = "My Notes";
 
+    /*!
+     * \brief the context which the current user is working with.
+     */
     NoteContext currentContext;
 
 
